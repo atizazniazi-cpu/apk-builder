@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MIAN X NIAZI — Real APK Builder</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#080b12;color:#fff;font-family:system-ui,Arial;min-height:100vh}
+.wrap{max-width:900px;margin:auto;padding:18px}.logo{font-size:25px;font-weight:900;text-align:center;letter-spacing:1px;
+background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);background-size:400%;
+-webkit-background-clip:text;color:transparent;animation:rgb 6s linear infinite}
+@keyframes rgb{to{background-position:400%}}
+.card{margin-top:15px;padding:15px;border:1px solid #273044;border-radius:18px;background:#101522;box-shadow:0 10px 35px #0008}
+label{display:block;margin:8px 0 6px;font-weight:700;color:#aeb9cc}input,textarea{width:100%;border:1px solid #303b51;background:#080c14;color:#fff;border-radius:12px;padding:12px;outline:none}
+textarea{min-height:380px;resize:vertical;font-family:ui-monospace,monospace;font-size:13px;line-height:1.45}
+button{width:100%;margin-top:12px;padding:13px;border:0;border-radius:12px;color:#fff;font-size:16px;font-weight:900;cursor:pointer;
+background:linear-gradient(90deg,#ff0055,#7b00ff,#00aaff,#00e676,#ffe600,#ff0055);background-size:400%;
+animation:rgb 5s linear infinite}
+small{display:block;color:#8490a5;margin-top:9px;line-height:1.4}.status{white-space:pre-wrap;margin-top:12px;padding:10px;border-radius:10px;background:#070a10;color:#b9c5d9;display:none}
+.badge{display:inline-block;margin-top:10px;padding:6px 9px;border-radius:99px;background:#182238;color:#9fb4d7;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">⚡ REAL APK BUILDER — MIAN X NIAZI</div>
+  <div class="card">
+    <label>App Name</label>
+    <input id="name" value="My Web App" maxlength="40">
+    <label>HTML Code</label>
+    <textarea id="code"><!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My App</title>
+<style>
+body{font-family:Arial;text-align:center;padding:40px;background:#111;color:white}
+button{padding:14px 25px;border:0;border-radius:10px}
+</style>
+</head>
+<body>
+<h1>Hello APK 👋</h1>
+<p>This HTML was converted into a real Android APK.</p>
+<button onclick="alert('Working!')">Test</button>
+</body>
+</html></textarea>
+    <span class="badge">HTML → Android WebView APK</span>
+    <button id="build">🚀 BUILD REAL APK</button>
+    <div id="status" class="status"></div>
+    <small>Build happens on the server. Your HTML is packaged into an Android app and the generated debug APK is returned.</small>
+  </div>
+</div>
+<script>
+const code=document.getElementById('code'), name=document.getElementById('name');
+const status=document.getElementById('status'), btn=document.getElementById('build');
+btn.onclick=async()=>{
+  if(!code.value.trim()) return alert('HTML code likho.');
+  btn.disabled=true; btn.textContent='⏳ BUILDING APK...';
+  status.style.display='block'; status.textContent='Build start ho gaya. Server Android APK compile kar raha hai...';
+  try{
+    const r=await fetch('/api/build',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({html:code.value,appName:name.value})});
+    if(!r.ok){
+      let e='Build failed';
+      try{const j=await r.json();e=j.details||j.error||e}catch{}
+      throw new Error(e);
+    }
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download=(name.value||'My-App').replace(/[^a-z0-9_-]/gi,'_')+'.apk';
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    status.textContent='✅ APK ready! Download start ho gaya.';
+  }catch(e){status.textContent='❌ '+e.message}
+  finally{btn.disabled=false;btn.textContent='🚀 BUILD REAL APK'}
+};
+</script>
+</body>
+</html>
