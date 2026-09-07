@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MIAN X NIAZI APK Builder</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;padding:15px;background:#080b12;color:white;
+ font-family:Arial,sans-serif
+}
+.box{
+ max-width:700px;margin:auto;background:#101522;
+ padding:18px;border-radius:18px
+}
+h1{
+ text-align:center;
+ background:linear-gradient(90deg,red,yellow,lime,cyan,blue,magenta,red);
+ background-size:400%;
+ -webkit-background-clip:text;
+ color:transparent;
+ animation:rgb 5s linear infinite
+}
+@keyframes rgb{to{background-position:400%}}
+input,textarea{
+ width:100%;padding:12px;margin:7px 0 14px;
+ background:#080b12;color:white;
+ border:1px solid #334;border-radius:10px
+}
+textarea{
+ height:350px;font-family:monospace
+}
+button{
+ width:100%;padding:14px;border:0;border-radius:12px;
+ font-size:17px;font-weight:bold;color:white;
+ background:linear-gradient(90deg,red,blue,cyan,lime,red);
+ background-size:400%;
+ animation:rgb 4s linear infinite
+}
+#status{
+ margin-top:12px;padding:10px;border-radius:10px;
+ background:#05070b;white-space:pre-wrap
+}
+</style>
+</head>
+
+<body>
+<div class="box">
+
+<h1>⚡ REAL APK BUILDER</h1>
+
+<label>App Name</label>
+<input id="appName" value="My Web App">
+
+<label>HTML Code</label>
+<textarea id="html"><!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My App</title>
+</head>
+<body style="text-align:center;background:#111;color:white;padding:40px">
+<h1>Hello APK 👋</h1>
+<p>My first Android app</p>
+</body>
+</html></textarea>
+
+<button onclick="buildAPK()">🚀 BUILD REAL APK</button>
+
+<div id="status">Ready...</div>
+
+</div>
+
+<script>
+async function buildAPK(){
+
+ const html=document.getElementById("html").value;
+ const appName=document.getElementById("appName").value;
+ const status=document.getElementById("status");
+
+ if(!html.trim()){
+   status.textContent="❌ HTML code missing";
+   return;
+ }
+
+ status.textContent="⏳ APK building... Please wait";
+
+ try{
+
+   const response=await fetch("/api/build",{
+     method:"POST",
+     headers:{
+       "Content-Type":"application/json"
+     },
+     body:JSON.stringify({
+       html:html,
+       appName:appName
+     })
+   });
+
+   if(!response.ok){
+
+     let message="Build failed";
+
+     try{
+       const data=await response.json();
+       message=data.details || data.error || message;
+     }catch(e){}
+
+     throw new Error(message);
+   }
+
+   const blob=await response.blob();
+
+   const url=URL.createObjectURL(blob);
+   const a=document.createElement("a");
+
+   a.href=url;
+   a.download=(appName || "My-App")
+     .replace(/[^a-z0-9_-]/gi,"_")+".apk";
+
+   document.body.appendChild(a);
+   a.click();
+   a.remove();
+
+   URL.revokeObjectURL(url);
+
+   status.textContent="✅ APK ready! Download started.";
+
+ }catch(error){
+
+   status.textContent="❌ "+error.message;
+
+ }
+
+}
+</script>
+
+</body>
+</html>
