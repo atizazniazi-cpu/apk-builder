@@ -2,12 +2,13 @@ FROM gradle:8.10.2-jdk17
 
 USER root
 
-# Install required packages including Node.js and npm
+# Install Node.js 20 + npm
 RUN apt-get update && \
-    apt-get install -y wget unzip ca-certificates nodejs npm && \
+    apt-get install -y curl wget unzip ca-certificates && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Android SDK
 ENV ANDROID_HOME=/opt/android-sdk
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 
@@ -20,19 +21,16 @@ RUN wget -q https://dl.google.com/android/repository/commandlinetools-linux-1107
        ${ANDROID_HOME}/cmdline-tools/latest && \
     rm /tmp/cmdline-tools.zip
 
-# Android SDK tools in PATH
 ENV PATH=${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/build-tools/35.0.0:$PATH
 
-# Accept Android licenses
 RUN yes | sdkmanager --licenses >/dev/null || true
 
-# Install Android SDK components
 RUN sdkmanager \
     "platform-tools" \
     "platforms;android-35" \
     "build-tools;35.0.0"
 
-# Verify installations
+# Check installed versions
 RUN node --version && \
     npm --version && \
     gradle --version && \
@@ -40,12 +38,10 @@ RUN node --version && \
 
 WORKDIR /app
 
-# Install Node dependencies
 COPY package*.json ./
 
 RUN npm install --omit=dev
 
-# Copy application
 COPY . .
 
 EXPOSE 3000
